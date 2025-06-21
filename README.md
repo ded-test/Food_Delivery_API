@@ -1,12 +1,12 @@
 Food Delivery API
 
 File Structure:
-
+```
 food_delivery_api/
 ├── app/
 │   ├── main.py
 │   ├── database.py
-│   ├── config.py 
+│   ├── config.py
 │   ├── models/
 │   │   ├── __init__.py
 │   │   ├── user.py
@@ -46,7 +46,7 @@ food_delivery_api/
 ├── docker-compose.yml
 ├── .env
 └── README.md
-
+```
 
 Basic models for Food Delivery API:
 
