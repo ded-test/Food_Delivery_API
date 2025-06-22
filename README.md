@@ -6,7 +6,7 @@ food_delivery_api/
 ├── app/
 │   ├── main.py
 │   ├── database.py
-│   ├── config.py 
+│   ├── config.py
 │   ├── models/
 │   │   ├── __init__.py
 │   │   ├── user.py
