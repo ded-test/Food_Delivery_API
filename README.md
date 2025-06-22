@@ -1,7 +1,7 @@
 Food Delivery API
 
 File Structure:
-
+```
 food_delivery_api/
 ├── app/
 │   ├── main.py
@@ -46,7 +46,7 @@ food_delivery_api/
 ├── docker-compose.yml
 ├── .env
 └── README.md
-
+```
 
 Basic models for Food Delivery API:
 
@@ -68,3 +68,4 @@ Basic models for Food Delivery API:
 
 - `Order` - orders with statuses, addresses, amounts
 - `OrderItem` - items in the order (product + quantity).
+

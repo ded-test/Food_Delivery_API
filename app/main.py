@@ -1,11 +1,12 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
-from app.database import db_manager, DATABASE_URL
+from app.database import DATABASE_URL, db_manager
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
     print("Application startup...")
     db_manager.init_db(DATABASE_URL)
 
@@ -18,14 +19,18 @@ async def lifespan(app: FastAPI):
     await db_manager.close()
     print("Database connections are closed")
 
+
 app = FastAPI(lifespan=lifespan)
+
 
 @app.post("/")
 async def hello():
-    return {"message":"Hello!"}
+    return {"message": "Hello!"}
+
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "main:app",
         host="127.0.0.1",

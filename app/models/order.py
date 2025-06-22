@@ -1,7 +1,9 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Enum, DateTime, func
-from sqlalchemy.orm import relationship
-from app.models.base import Base
 import enum
+
+from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Integer, String, func
+from sqlalchemy.orm import relationship
+
+from app.models.base import Base
 
 
 class OrderStatus(enum.Enum):
@@ -24,7 +26,9 @@ class Order(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     user = relationship("User", backref="orders")
-    items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+    items = relationship(
+        "OrderItem", back_populates="order", cascade="all, delete-orphan"
+    )
 
 
 class OrderItem(Base):
@@ -38,4 +42,3 @@ class OrderItem(Base):
 
     order = relationship("Order", back_populates="items")
     product = relationship("Product")
-

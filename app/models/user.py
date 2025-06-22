@@ -1,6 +1,7 @@
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
 from app.models.base import Base
-from sqlalchemy import Column, Integer, String, ForeignKey
 
 
 class User(Base):
@@ -18,7 +19,7 @@ class UserAddress(Base):
     __tablename__ = "user_addresses"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey("users.id"))
 
     street = Column(String(100), nullable=False)
     house_number = Column(String(20), nullable=False)

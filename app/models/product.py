@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean
+from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
 from app.models.base import Base
+
 
 class Category(Base):
     __tablename__ = "categories"
@@ -8,7 +10,9 @@ class Category(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False, unique=True)
 
-    products = relationship("Product", back_populates="category", cascade="all, delete-orphan")
+    products = relationship(
+        "Product", back_populates="category", cascade="all, delete-orphan"
+    )
 
 
 class Product(Base):
