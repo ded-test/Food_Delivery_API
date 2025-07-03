@@ -23,6 +23,6 @@ class Product(Base):
     description = Column(String(255))
     price = Column(Float, nullable=False)
     is_available = Column(Boolean, default=False)
-
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
+
     category = relationship("Category", back_populates="products")

@@ -11,8 +11,14 @@ class User(Base):
     first_name = Column(String(50))
     last_name = Column(String(50))
     number = Column(String, unique=True)
+    password_salt = Column(String(64), nullable=False)
+    password_hash = Column(String(128), nullable=False)
+
 
     addresses = relationship("UserAddress", back_populates="user")
+
+    def __repr__(self):
+        return f"<User(id={self.id}, number='{self.number}', name='{self.first_name} {self.last_name}')>"
 
 
 class UserAddress(Base):
@@ -28,3 +34,6 @@ class UserAddress(Base):
     country = Column(String(50), nullable=False)
 
     user = relationship("User", back_populates="addresses")
+
+    def __repr__(self):
+        return f"<UserAddress(id={self.id}, user_id={self.user_id}, city='{self.city}')>"
