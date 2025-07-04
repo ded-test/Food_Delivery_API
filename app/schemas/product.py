@@ -40,6 +40,7 @@ class CategoryUpdate(BaseModel):
 
 class CategoryResponse(CategoryBase):
     id: int
+    products_count: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -139,6 +140,7 @@ class ProductUpdate(BaseModel):
 
 class ProductResponse(ProductBase):
     id: int
+    category: Optional[dict] = None
 
     class Config:
         from_attributes = True
