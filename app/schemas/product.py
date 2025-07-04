@@ -5,35 +5,38 @@ from typing import Optional
 class CategoryBase(BaseModel):
     name: str
 
-    @field_validator('name')
+    @field_validator("name")
     @classmethod
     def validate_name(cls, v):
         if not v or not v.strip():
-            raise ValueError('Имя категории не должно быть пустым')
+            raise ValueError("The category name should not be empty.")
         if len(v.strip()) < 2:
-            raise ValueError('Имя категории должно содержать минимум 2 символа')
+            raise ValueError("The category name must contain at least 2 characters")
         if len(v.strip()) > 100:
-            raise ValueError('Имя категории не должно превышать 100 символов')
+            raise ValueError("The category name should not exceed 100 characters")
         return v.strip()
+
 
 class CategoryCreate(CategoryBase):
     pass
 
+
 class CategoryUpdate(BaseModel):
     name: Optional[str] = None
 
-    @field_validator('name')
+    @field_validator("name")
     @classmethod
     def validate_name_if_provided(cls, v):
         if v is not None:
             if not v or not v.strip():
-                raise ValueError('Имя категории не должно быть пустым')
+                raise ValueError("The category name should not be empty.")
             if len(v.strip()) < 2:
-                raise ValueError('Имя категории должно содержать минимум 2 символа')
+                raise ValueError("The category name must contain at least 2 characters")
             if len(v.strip()) > 100:
-                raise ValueError('Имя категории не должно превышать 100 символов')
+                raise ValueError("The category name should not exceed 100 characters")
             return v.strip()
         return v
+
 
 class CategoryResponse(CategoryBase):
     id: int
@@ -49,42 +52,44 @@ class ProductBase(BaseModel):
     is_available: bool = False
     category_id: int
 
-    @field_validator('name')
+    @field_validator("name")
     @classmethod
     def validate_name(cls, v):
         if not v or not v.strip():
-            raise ValueError('Название продукта не должно быть пустым')
+            raise ValueError("The product name should not be empty.")
         if len(v.strip()) < 2:
-            raise ValueError('Название продукта должно содержать минимум 2 символа')
+            raise ValueError("The product name must contain at least 2 characters")
         if len(v.strip()) > 100:
-            raise ValueError('Название продукта не должно превышать 100 символов')
+            raise ValueError("The product name should not exceed 100 characters")
         return v.strip()
 
-    @field_validator('description')
+    @field_validator("description")
     @classmethod
     def validate_description(cls, v):
         if v and len(v.strip()) > 255:
-            raise ValueError('Описание не должно превышать 255 символов')
+            raise ValueError("The description should not exceed 255 characters")
         return v.strip() if v else v
 
-    @field_validator('price')
+    @field_validator("price")
     @classmethod
     def validate_price(cls, v):
         if v <= 0:
-            raise ValueError('Цена должна быть больше 0')
+            raise ValueError("The price must be more than 0")
         if v > 999_999.99:
-            raise ValueError('Цена слишком большая')
+            raise ValueError("The price is too high")
         return round(v, 2)
 
-    @field_validator('category_id')
+    @field_validator("category_id")
     @classmethod
     def validate_category_id(cls, v):
         if v <= 0:
-            raise ValueError('ID категории должен быть больше 0')
+            raise ValueError("The category ID must be greater than 0")
         return v
+
 
 class ProductCreate(ProductBase):
     pass
+
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
@@ -93,43 +98,44 @@ class ProductUpdate(BaseModel):
     is_available: Optional[bool] = None
     category_id: Optional[int] = None
 
-    @field_validator('name')
+    @field_validator("name")
     @classmethod
     def validate_name_if_provided(cls, v):
         if v is not None:
             if not v or not v.strip():
-                raise ValueError('Название продукта не должно быть пустым')
+                raise ValueError("The product name should not be empty.")
             if len(v.strip()) < 2:
-                raise ValueError('Название продукта должно содержать минимум 2 символа')
+                raise ValueError("The product name must contain at least 2 characters")
             if len(v.strip()) > 100:
-                raise ValueError('Название продукта не должно превышать 100 символов')
+                raise ValueError("The product name should not exceed 100 characters")
             return v.strip()
         return v
 
-    @field_validator('description')
+    @field_validator("description")
     @classmethod
     def validate_description_if_provided(cls, v):
         if v is not None and len(v.strip()) > 255:
-            raise ValueError('Описание не должно превышать 255 символов')
+            raise ValueError("The description should not exceed 255 characters")
         return v.strip() if v else v
 
-    @field_validator('price')
+    @field_validator("price")
     @classmethod
     def validate_price_if_provided(cls, v):
         if v is not None:
             if v <= 0:
-                raise ValueError('Цена должна быть больше 0')
+                raise ValueError("The price must be more than 0")
             if v > 999999.99:
-                raise ValueError('Цена слишком большая')
+                raise ValueError("The price is too high")
             return round(v, 2)
         return v
 
-    @field_validator('category_id')
+    @field_validator("category_id")
     @classmethod
     def validate_category_id_if_provided(cls, v):
         if v is not None and v <= 0:
-            raise ValueError('ID категории должен быть больше 0')
+            raise ValueError("The category ID must be greater than 0")
         return v
+
 
 class ProductResponse(ProductBase):
     id: int

@@ -14,7 +14,6 @@ class User(Base):
     password_salt = Column(String(64), nullable=False)
     password_hash = Column(String(128), nullable=False)
 
-
     addresses = relationship("UserAddress", back_populates="user")
 
     def __repr__(self):
@@ -36,4 +35,6 @@ class UserAddress(Base):
     user = relationship("User", back_populates="addresses")
 
     def __repr__(self):
-        return f"<UserAddress(id={self.id}, user_id={self.user_id}, city='{self.city}')>"
+        return (
+            f"<UserAddress(id={self.id}, user_id={self.user_id}, city='{self.city}')>"
+        )

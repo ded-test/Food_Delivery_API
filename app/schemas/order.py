@@ -12,7 +12,8 @@ class OrderStatus(str, Enum):
     DELIVERED = "delivered"
     CANCELED = "canceled"
 
-# Схемы для элементов заказа
+
+# Schemas for the order elements
 class OrderItemBase(BaseModel):
     product_id: int
     quantity: int = Field(ge=1, default=1)
@@ -34,7 +35,8 @@ class OrderItemResponse(OrderItemBase):
     id: int
     order_id: int
 
-# Схемы для заказов
+
+# Schemes for orders
 class OrderBase(BaseModel):
     delivery_address: str = Field(min_length=1, max_length=255)
 
@@ -60,32 +62,35 @@ class OrderResponse(OrderBase):
     created_at: datetime
     items: List[OrderItemResponse] = []
 
-# Расширенная схема ответа с информацией о пользователе
+
+# Extended response schema with user information
 class OrderWithUserResponse(OrderResponse):
     model_config = ConfigDict(from_attributes=True)
     user: Optional[UserResponse] = None
 
 
-# Для пагинированного списка заказов с метаданными
+# For a paginated order list with metadata
 class OrderListResponse(BaseModel):
     orders: List[OrderResponse]
     total: int
     page: int
     size: int
 
-# Cпециализированные схемы для работы со статусами заказов
+
+# Specialized schemes for working with order statuses
 class OrderStatusUpdate(BaseModel):
     status: OrderStatus
 
-    @field_validator('status')
+    @field_validator("status")
     @classmethod
     def validate_status(cls, v):
         if not isinstance(v, OrderStatus):
             try:
-                # Попытка создать OrderStatus из строки
                 return OrderStatus(v)
             except ValueError:
-                raise ValueError(f'Invalid order status: {v}. Must be one of: {[s.value for s in OrderStatus]}')
+                raise ValueError(
+                    f"Invalid order status: {v}. Must be one of: {[s.value for s in OrderStatus]}"
+                )
         return v
 
 

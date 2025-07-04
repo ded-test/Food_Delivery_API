@@ -13,15 +13,17 @@ class RestaurantBase(BaseModel):
     city: str
     country: str
 
-    @field_validator('name', 'street', 'house_number', 'apartment', 'city', 'country')
+    @field_validator("name", "street", "house_number", "apartment", "city", "country")
     @classmethod
     def validate_non_empty_strings(cls, v):
         if not v or not v.strip():
-            raise ValueError('Поле не может быть пустым')
+            raise ValueError("Поле не может быть пустым")
         return v.strip()
+
 
 class RestaurantCreate(RestaurantBase):
     pass
+
 
 class RestaurantUpdate(BaseModel):
     name: Optional[str] = None
@@ -33,11 +35,11 @@ class RestaurantUpdate(BaseModel):
     city: Optional[str] = None
     country: Optional[str] = None
 
-    @field_validator('name', 'street', 'house_number', 'apartment', 'city', 'country')
+    @field_validator("name", "street", "house_number", "apartment", "city", "country")
     @classmethod
     def validate_non_empty_strings_if_provided(cls, v):
         if v is not None and (not v or not v.strip()):
-            raise ValueError('Поле не может быть пустым')
+            raise ValueError("Поле не может быть пустым")
         return v.strip() if v else v
 
 
@@ -46,7 +48,8 @@ class RestaurantResponse(RestaurantBase):
 
     id: int
 
-# Дополнительные схемы для специфических случаев
+
+# Additional schemes for specific cases
 class RestaurantPublicInfo(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -59,6 +62,7 @@ class RestaurantPublicInfo(BaseModel):
     @property
     def location(self) -> str:
         return f"{self.city}, {self.country}"
+
 
 class RestaurantWithFullAddress(RestaurantResponse):
     model_config = ConfigDict(from_attributes=True)

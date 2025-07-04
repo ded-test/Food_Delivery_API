@@ -49,7 +49,7 @@ class DatabaseManager:
             raise RuntimeError("Database not initialized! Call init_db() first")
         async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        print("✅ Database tables created successfully")
+        print("Database tables created successfully")
 
     async def drop_tables(self):
         """Drop all database tables (useful for testing)"""
@@ -58,7 +58,7 @@ class DatabaseManager:
 
         async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
-        print("✅ Database tables dropped successfully")
+        print("Database tables dropped successfully")
 
     async def recreate_tables(self):
         """Drop and recreate all tables"""
