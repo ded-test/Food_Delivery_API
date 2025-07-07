@@ -140,6 +140,21 @@ class RedisManager(SingletonMeta):
             self.redis = None
             raise RuntimeError(f"Redis initialization failed: {e}")
 
+    async def set(self, key: str, value: str, expire: Optional[int] = None):
+        if not self.redis:
+            raise RuntimeError("Redis not initialized! Call init_redis() first")
+        await self.redis.set(key, value, ex=expire)
+
+    async def get(self, key: str) -> Optional[str]:
+        if not self.redis:
+            raise RuntimeError("Redis not initialized! Call init_redis() first")
+        return await self.redis.get(key)
+
+    async def delete(self, key: str):
+        if not self.redis:
+            raise RuntimeError("Redis not initialized! Call init_redis() first")
+        await self.redis.delete(key)
+
     async def close(self):
         """Close Redis connection"""
         if self.redis:
