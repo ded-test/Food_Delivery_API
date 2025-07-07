@@ -24,7 +24,7 @@ class Order(Base):
     status: Mapped[OrderStatus] = mapped_column(
         Enum(OrderStatus), default=OrderStatus.NEW
     )
-    total_amount: Mapped[float] = mapped_column(Float, default=0.0)
+    total_amount: Mapped[float] = mapped_column(default=0.0)
 
     delivery_address: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
