@@ -9,32 +9,32 @@ from app.core.database import db_manager, redis_manager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Application startup...")
+    print("🟢 Application startup...")
     try:
-        print("Initializing database...")
+        print("🟢 Initializing database...")
         db_manager.init_db(settings.DATABASE_URL)
 
-        print("Creating database tables...")
+        print("🟢 Creating database tables...")
         await db_manager.create_tables()
 
-        print("Initializing Redis...")
+        print("🟢 Initializing Redis...")
         await redis_manager.init_redis(settings.REDIS_URL)
 
-        print("Testing connections...")
+        print("🟢 Testing connections...")
         await _test_connections()
 
-        print("All services initialized successfully!")
+        print("🟢 All services initialized successfully!")
 
     except Exception as e:
-        print(f"Startup failed: {e}")
+        print(f"🟢 Startup failed: {e}")
         await _cleanup()
         raise
 
     yield
 
-    print("Application shutdown...")
+    print("🟢 Application shutdown...")
     await _cleanup()
-    print("Application stopped successfully")
+    print("🟢 Application stopped successfully")
 
 
 async def _test_connections():
@@ -44,18 +44,18 @@ async def _test_connections():
     try:
         async with db_manager.get_session() as session:
             await session.execute(select(1))
-        print("PostgreSQL connection OK")
+        print("🟢 PostgreSQL connection OK")
     except Exception as e:
-        print(f"PostgreSQL connection failed: {e}")
+        print(f"🟢 PostgreSQL connection failed: {e}")
         raise
 
     # test Redis
     try:
         async with redis_manager.get_client() as redis:
             redis.ping()
-        print("Redis connection OK")
+        print("🟢 Redis connection OK")
     except Exception as e:
-        print(f"Redis connection failed: {e}")
+        print(f"🟢 Redis connection failed: {e}")
         raise
 
 
@@ -64,14 +64,14 @@ async def _cleanup():
     try:
         # Closing Redis
         await redis_manager.close()
-        print("Redis connections closed")
+        print("🟢 Redis connections closed")
 
         # Closing PostgreSQL
         await db_manager.close()
-        print("Database connections closed")
+        print("🟢 Database connections closed")
 
     except Exception as e:
-        print(f"Cleanup warning: {e}")
+        print(f"🟢 Cleanup warning: {e}")
 
 
 main_app = FastAPI(lifespan=lifespan)
