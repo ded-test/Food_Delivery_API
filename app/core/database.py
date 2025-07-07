@@ -1,8 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Any
-from aioredis import Redis
+import redis
 from typing import Optional, TypeVar, Type
-import aioredis
 import threading
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -129,16 +128,22 @@ class RedisManager(SingletonMeta):
 
     async def init_redis(self, database_url: str):
         if self.redis is not None:
+            print(f"Redis already initialized with URL: {self._database_url}")
             return
 
         try:
-            self.redis = aioredis.from_url(database_url, decode_responses=True)
-            await self.redis.ping()
+            self.redis = redis.from_url(
+                database_url,
+                decode_responses=True,
+                encoding="utf-8"
+            )
+            self.redis.ping()
             self._database_url = database_url
             print(f"Redis initialized: {database_url}")
         except Exception as e:
             self.redis = None
             raise RuntimeError(f"Redis initialization failed: {e}")
+
 
     async def set(self, key: str, value: str, expire: Optional[int] = None):
         if not self.redis:
@@ -158,13 +163,13 @@ class RedisManager(SingletonMeta):
     async def close(self):
         """Close Redis connection"""
         if self.redis:
-            await self.redis.close()
+            await self.redis.aclose()  # Изменено для redis-py
             self.redis = None
             self._database_url = None
             print("RedisManager closed")
 
     @asynccontextmanager
-    async def get_client(self) -> AsyncGenerator[aioredis.Redis, None]:
+    async def get_client(self) -> AsyncGenerator[redis.Redis, None]:
         """Context manager for Redis client"""
         if not self.redis:
             raise RuntimeError("Redis not initialized! Call init_redis() first")
@@ -175,12 +180,18 @@ class RedisManager(SingletonMeta):
             pass
 
     async def set(self, key: str, value: str, expire: Optional[int] = None):
+        if not self.redis:
+            raise RuntimeError("Redis not initialized! Call init_redis() first")
         await self.redis.set(key, value, ex=expire)
 
     async def get(self, key: str) -> Optional[str]:
+        if not self.redis:
+            raise RuntimeError("Redis not initialized! Call init_redis() first")
         return await self.redis.get(key)
 
     async def delete(self, key: str):
+        if not self.redis:
+            raise RuntimeError("Redis not initialized! Call init_redis() first")
         await self.redis.delete(key)
 
 
@@ -192,6 +203,6 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-async def get_redis() -> AsyncGenerator[Redis, Any]:
-    async with redis_manager.get_client() as redis:
-        yield redis
+async def get_redis() -> AsyncGenerator[redis.Redis, None]:
+    async with redis_manager.get_client() as redis_client:
+        yield redis_client
