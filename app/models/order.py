@@ -1,8 +1,11 @@
 import enum
+from datetime import datetime
+from typing import List
 
-from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Integer, String, func
-from sqlalchemy.orm import relationship
+from sqlalchemy import Float, ForeignKey, String, func, Enum
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
+from app.models import Product, User
 from app.models.base import Base
 
 
@@ -16,29 +19,31 @@ class OrderStatus(enum.Enum):
 class Order(Base):
     __tablename__ = "orders"
 
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    status = Column(Enum(OrderStatus), default=OrderStatus.NEW, nullable=False)
-    total_amount = Column(Float, nullable=False, default=0.0)
+    status: Mapped[OrderStatus] = mapped_column(
+        Enum(OrderStatus), default=OrderStatus.NEW
+    )
+    total_amount: Mapped[float] = mapped_column(Float, default=0.0)
 
-    delivery_address = Column(String(255), nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
+    delivery_address: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
-    user = relationship("User", backref="orders")
-    items = relationship(
-        "OrderItem", back_populates="order", cascade="all, delete-orphan"
+    user: Mapped["User"] = relationship(back_populates="orders")
+    items: Mapped[List["OrderItem"]] = relationship(
+        back_populates="order", cascade="all, delete-orphan"
     )
 
 
 class OrderItem(Base):
     __tablename__ = "order_items"
 
-    id = Column(Integer, primary_key=True)
-    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
-    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
-    quantity = Column(Integer, nullable=False, default=1)
-    price_per_item = Column(Float, nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
+    quantity: Mapped[int] = mapped_column(nullable=False, default=1)
+    price_per_item: Mapped[float] = mapped_column(nullable=False)
 
-    order = relationship("Order", back_populates="items")
-    product = relationship("Product")
+    order: Mapped["Order"] = relationship(back_populates="items")
+    product: Mapped["Product"] = relationship()

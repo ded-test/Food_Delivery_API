@@ -1,20 +1,26 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from typing import List
 
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship, mapped_column, Mapped
+
+from app.models import Order
 from app.models.base import Base
 
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True)
-    first_name = Column(String(50))
-    last_name = Column(String(50))
-    number = Column(String, unique=True)
-    password_salt = Column(String(64), nullable=False)
-    password_hash = Column(String(128), nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    first_name: Mapped[str] = mapped_column(nullable=False)
+    last_name: Mapped[str] = mapped_column(nullable=False)
+    number: Mapped[str] = mapped_column(unique=True, nullable=False)
+    password_salt: Mapped[str] = mapped_column(nullable=False)
+    password_hash: Mapped[str] = mapped_column(nullable=False)
 
-    addresses = relationship("UserAddress", back_populates="user")
+    addresses: Mapped[List["UserAddress"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    orders: Mapped[List["Order"]] = relationship(back_populates="user")
 
     def __repr__(self):
         return f"<User(id={self.id}, number='{self.number}', name='{self.first_name} {self.last_name}')>"
@@ -23,16 +29,16 @@ class User(Base):
 class UserAddress(Base):
     __tablename__ = "user_addresses"
 
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
 
-    street = Column(String(100), nullable=False)
-    house_number = Column(String(20), nullable=False)
-    apartment = Column(String(20), nullable=False)
-    city = Column(String(50), nullable=False)
-    country = Column(String(50), nullable=False)
+    street: Mapped[str] = mapped_column(nullable=False)
+    house_number: Mapped[str] = mapped_column(nullable=False)
+    apartment: Mapped[str] = mapped_column(nullable=True)
+    city: Mapped[str] = mapped_column(nullable=False)
+    country: Mapped[str] = mapped_column(nullable=False)
 
-    user = relationship("User", back_populates="addresses")
+    user: Mapped["User"] = relationship(back_populates="addresses")
 
     def __repr__(self):
         return (

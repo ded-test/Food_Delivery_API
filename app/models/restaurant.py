@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base
 
@@ -6,12 +6,12 @@ from app.models.base import Base
 class Restaurant(Base):
     __tablename__ = "restaurants"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    description = Column(String(255))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=False)
+    description: Mapped[str] = mapped_column(nullable=True)
 
-    street = Column(String(100), nullable=False)
-    house_number = Column(String(20), nullable=False)
-    apartment = Column(String(20), nullable=False)
-    city = Column(String(50), nullable=False)
-    country = Column(String(50), nullable=False)
+    street: Mapped[str] = mapped_column(nullable=False)
+    house_number: Mapped[str] = mapped_column(nullable=False)
+    apartment: Mapped[str] = mapped_column(nullable=True)
+    city: Mapped[str] = mapped_column(nullable=False)
+    country: Mapped[str] = mapped_column(nullable=False)

@@ -1,5 +1,6 @@
-from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship, Mapped
+from sqlalchemy.orm import mapped_column
 
 from app.models.base import Base
 
@@ -7,22 +8,24 @@ from app.models.base import Base
 class Category(Base):
     __tablename__ = "categories"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False, unique=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=False, unique=True)
 
-    products = relationship(
-        "Product", back_populates="category", cascade="all, delete-orphan"
+    products: Mapped["Product"] = relationship(
+        back_populates="category", cascade="all, delete-orphan"
     )
 
 
 class Product(Base):
     __tablename__ = "products"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    description = Column(String(255))
-    price = Column(Float, nullable=False)
-    is_available = Column(Boolean, default=False)
-    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=False)
+    description: Mapped[str]
+    price: Mapped[float] = mapped_column(nullable=False)
+    is_available: Mapped[bool] = mapped_column(default=False)
+    category_id: Mapped[int] = mapped_column(
+        ForeignKey("categories.id"), nullable=False
+    )
 
-    category = relationship("Category", back_populates="products")
+    category: Mapped["Category"] = relationship(back_populates="products")
