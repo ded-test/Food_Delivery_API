@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Any
+from typing import AsyncGenerator
 import redis
 from typing import Optional, TypeVar, Type
 import threading
@@ -13,17 +13,20 @@ DATABASE_URL = settings.DATABASE_URL
 REDIS_URL = settings.REDIS_URL
 
 # typing for correct handling of inheritance
-S = TypeVar('S', bound='SingletonMeta')
+S = TypeVar("S", bound="SingletonMeta")
 
 """
-    TypeVar is a special mechanism that allows you to 
+TypeVar is a special mechanism that allows you to 
 create generalized (generic) types.
-    bound='SingletonMeta' means that T can only be 
+
+bound='SingletonMeta' means that T can only be 
 a type that inherits from SingletonMeta
-    The problem without typing:
+
+The problem without typing:
 Without typing, the __new__ method will simply return 
 object, which loses information about the specific class.
 """
+
 
 class SingletonMeta:
     _instances = {}
@@ -32,8 +35,8 @@ class SingletonMeta:
     # Double-Checked Locking
     def __new__(cls: Type[S]) -> S:
         if cls not in cls._instances:  # first check (without blocking)
-            with cls._lock: # lock capture
-                if cls not in cls._instances: # second check (under lockdown)
+            with cls._lock:  # lock capture
+                if cls not in cls._instances:  # second check (under lockdown)
                     cls._instances[cls] = super().__new__(cls)
         return cls._instances[cls]
 
@@ -133,9 +136,7 @@ class RedisManager(SingletonMeta):
 
         try:
             self.redis = redis.from_url(
-                database_url,
-                decode_responses=True,
-                encoding="utf-8"
+                database_url, decode_responses=True, encoding="utf-8"
             )
             self.redis.ping()
             self._database_url = database_url
@@ -143,7 +144,6 @@ class RedisManager(SingletonMeta):
         except Exception as e:
             self.redis = None
             raise RuntimeError(f"Redis initialization failed: {e}")
-
 
     async def set(self, key: str, value: str, expire: Optional[int] = None):
         if not self.redis:

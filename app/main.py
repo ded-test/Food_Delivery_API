@@ -36,6 +36,7 @@ async def lifespan(app: FastAPI):
     await _cleanup()
     print("Application stopped successfully")
 
+
 async def _test_connections():
     """Connection testing"""
 
@@ -57,6 +58,7 @@ async def _test_connections():
         print(f"Redis connection failed: {e}")
         raise
 
+
 async def _cleanup():
     """Cleaning up resources"""
     try:
@@ -70,6 +72,7 @@ async def _cleanup():
 
     except Exception as e:
         print(f"Cleanup warning: {e}")
+
 
 main_app = FastAPI(lifespan=lifespan)
 
