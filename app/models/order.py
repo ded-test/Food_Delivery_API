@@ -5,7 +5,6 @@ from typing import List
 from sqlalchemy import Float, ForeignKey, String, func, Enum
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
-from app.models import Product, User
 from app.models.base import Base
 
 

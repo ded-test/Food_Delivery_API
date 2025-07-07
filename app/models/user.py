@@ -3,7 +3,6 @@ from typing import List
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 
-from app.models import Order
 from app.models.base import Base
 
 
