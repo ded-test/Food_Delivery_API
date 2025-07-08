@@ -11,7 +11,8 @@ class Category(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(nullable=False, unique=True)
 
-    products: Mapped["Product"] = relationship(
+    # One-to-Many
+    products: Mapped[list["Product"]] = relationship(
         back_populates="category", cascade="all, delete-orphan"
     )
 
@@ -28,4 +29,5 @@ class Product(Base):
         ForeignKey("categories.id"), nullable=False
     )
 
+    # Many-to-One
     category: Mapped["Category"] = relationship(back_populates="products")

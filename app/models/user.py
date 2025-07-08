@@ -24,9 +24,11 @@ class User(Base):
     password_salt: Mapped[str] = mapped_column(nullable=False)
     password_hash: Mapped[str] = mapped_column(nullable=False)
 
+    # One-to-Many
     addresses: Mapped[List["UserAddress"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    # One-to-Many
     orders: Mapped[List["Order"]] = relationship(back_populates="user")
 
     def __repr__(self):
@@ -45,6 +47,7 @@ class UserAddress(Base):
     city: Mapped[str] = mapped_column(nullable=False)
     country: Mapped[str] = mapped_column(nullable=False)
 
+    # Many-to-One
     user: Mapped["User"] = relationship(back_populates="addresses")
 
     def __repr__(self):
