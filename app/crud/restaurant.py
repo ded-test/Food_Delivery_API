@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Any, Type
 from sqlalchemy.orm import Session
 
 from app.models.restaurant import Restaurant
@@ -7,13 +7,16 @@ from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate
 
 class RestaurantCRUD:
 
-    def get_by_id(self, db: Session, restaurant_id: int) -> Optional[Restaurant]:
+    @staticmethod
+    def get_by_id(db: Session, restaurant_id: int) -> Optional[Restaurant]:
         return db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
 
-    def get_by_name(self, db: Session, restaurant_name: str) -> List[Restaurant]:
+    @staticmethod
+    def get_by_name(db: Session, restaurant_name: str) -> list[Type[Restaurant]]:
         return db.query(Restaurant).filter(Restaurant.name == restaurant_name).all()
 
-    def create(self, db: Session, restaurant_create: RestaurantCreate) -> Restaurant:
+    @staticmethod
+    def create(db: Session, restaurant_create: RestaurantCreate) -> Restaurant:
         """
         Create new restaurant
 
@@ -40,8 +43,9 @@ class RestaurantCRUD:
 
         return db_restaurant
 
+    @staticmethod
     def update(
-        self, db: Session, restaurant_id: int, restaurant_update: RestaurantUpdate
+        db: Session, restaurant_id: int, restaurant_update: RestaurantUpdate
     ) -> Optional[Restaurant]:
         """
         Update restaurant
@@ -54,7 +58,7 @@ class RestaurantCRUD:
         Returns:
             Restaurant: Updated Restaurant or None if not found
         """
-        db_restaurant = self.get_by_id(db, restaurant_id)
+        db_restaurant = RestaurantCRUD.get_by_id(db, restaurant_id)
         if not db_restaurant:
             return None
 
@@ -68,7 +72,8 @@ class RestaurantCRUD:
 
         return db_restaurant
 
-    def delete(self, db: Session, restaurant_id: int):
+    @staticmethod
+    def delete(db: Session, restaurant_id: int):
         """
         Delete restaurant
 
@@ -79,7 +84,7 @@ class RestaurantCRUD:
         Returns:
             bool: True if deleted, False if not found
         """
-        db_restaurant = self.get_by_id(db, restaurant_id)
+        db_restaurant = RestaurantCRUD.get_by_id(db, restaurant_id)
         if not db_restaurant:
             return False
 

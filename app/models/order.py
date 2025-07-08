@@ -11,7 +11,8 @@ from app.models.base import Base
 class OrderStatus(enum.Enum):
     NEW = "new"
     PROCESSING = "processing"
-    DELIVERED = "delivered"
+    DELIVERY = "delivery"
+    COMPLETED = "completed"
     CANCELED = "canceled"
 
 
@@ -44,7 +45,7 @@ class OrderItem(Base):
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), nullable=False)
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
     quantity: Mapped[int] = mapped_column(nullable=False, default=1)
-    price_per_item: Mapped[float] = mapped_column(nullable=False)
+    price: Mapped[float] = mapped_column(nullable=False)
 
     # Many-to-One
     order: Mapped["Order"] = relationship(back_populates="items")

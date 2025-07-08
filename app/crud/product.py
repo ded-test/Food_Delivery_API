@@ -1,6 +1,9 @@
-from typing import Optional
-from sqlalchemy.orm import Session
+from typing import Optional, List, Type, Any, Coroutine, Sequence
 
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
+
+from app.models import Product
 from app.models.product import Product, Category
 from app.schemas.product import (
     ProductCreate,
@@ -12,30 +15,41 @@ from app.schemas.product import (
 
 class ProductCRUD:
 
-    def get_by_id(self, db: Session, product_id: int) -> Optional[Product]:
-        return db.query(Product).filter(Product.id == product_id).first()
+    @staticmethod
+    async def get_by_id(db: AsyncSession, product_id: int) -> Optional[Product]:
+        result = await db.execute((select(Product).filter(Product.id == product_id)))
+        return result.scalar_one_or_none()
 
-    def get_by_name(self, db: Session, product_name: str) -> Optional[Product]:
-        return db.query(Product).filter(Product.name == product_name).first()
+    @staticmethod
+    async def get_by_name(db: AsyncSession, product_name: str) -> Optional[Product]:
+        result = await db.execute((select(Product).filter(Product.name == product_name)))
+        return result.scalar_one_or_none()
 
-    def toggle_availability(self, db: Session, product_id: int) -> Optional[Product]:
+    @staticmethod
+    async def get_all_products(db: AsyncSession) -> Sequence[Product]:
+        result = await db.execute(select(Product))
+        return result.scalars().all()
+
+    @staticmethod
+    async def toggle_availability(db: AsyncSession, product_id: int) -> Optional[Product]:
         """Toggle product availability"""
-        db_product = self.get_by_id(db, product_id)
+        db_product = await ProductCRUD.get_by_id(db, product_id)
         if not db_product:
             return None
 
         db_product.is_available = not db_product.is_available
-        db.commit()
-        db.refresh(db_product)
+        await db.commit()
+        await db.refresh(db_product)
 
         return db_product
 
-    def create(self, db: Session, product_create: ProductCreate) -> Product:
+    @staticmethod
+    async def create(db: AsyncSession, product_create: ProductCreate) -> Product:
         """
         Create new product
 
         Args:
-            db: Database session
+            db: Database AsyncSession
             product_create: Product creation schema
 
         Returns:
@@ -50,26 +64,27 @@ class ProductCRUD:
         )
 
         db.add(db_product)
-        db.commit()
-        db.refresh(db_product)
+        await db.commit()
+        await db.refresh(db_product)
 
         return db_product
 
-    def update(
-        self, db: Session, product_id: int, product_update: ProductUpdate
+    @staticmethod
+    async def update(
+        db: AsyncSession, product_id: int, product_update: ProductUpdate
     ) -> Optional[Product]:
         """
         Update product
 
         Args:
-            db: Database session
+            db: Database AsyncSession
             product_id: Product ID
             product_update: Data for update
 
         Returns:
             Product: Updated product or None if not found
         """
-        db_product = self.get_by_id(db, product_id)
+        db_product = await ProductCRUD.get_by_id(db, product_id)
         if not db_product:
             return None
 
@@ -78,78 +93,85 @@ class ProductCRUD:
         for field, value in update_data.items():
             setattr(db_product, field, value)
 
-        db.commit()
-        db.refresh(db_product)
+        await db.commit()
+        await db.refresh(db_product)
 
         return db_product
 
-    def delete(self, db: Session, product_id: int) -> bool:
+    @staticmethod
+    async def delete(db: AsyncSession, product_id: int) -> bool:
         """
         Delete product
 
         Args:
-            db: Database session
+            db: Database AsyncSession
             product_id: Product ID
 
         Returns:
             bool: True if deleted, False if not found
         """
-        db_product = self.get_by_id(db, product_id)
+        db_product = await ProductCRUD.get_by_id(db, product_id)
         if not db_product:
             return False
 
-        db.delete(db_product)
-        db.commit()
+        await db.delete(db_product)
+        await db.commit()
 
         return True
 
 
 class CategoryCRUD:
 
-    def get_by_id(self, db: Session, category_id: int) -> Optional[Category]:
-        return db.query(Category).filter(Category.id == category_id).first()
+    @staticmethod
+    async def get_by_id(db: AsyncSession, category_id: int) -> Optional[Category]:
+        result = await db.execute(select(Category).filter(Category.id == category_id))
+        return result.scalar_one_or_none()
 
-    def get_by_name(self, db: Session, category_name: str) -> Optional[Category]:
-        return db.query(Category).filter(Category.name == category_name).first()
+    @staticmethod
+    async def get_by_name(db: AsyncSession, category_name: str) -> Optional[Category]:
+        result = await db.execute(select(Category).filter(Category.name == category_name))
+        return result.scalar_one_or_none()
 
-    def create(self, db: Session, category_create: CategoryCreate):
+    @staticmethod
+    async def create(db: AsyncSession, category_create: CategoryCreate):
         """
         Create new category
 
         Args:
-            db: Database session
+            db: Database AsyncSession
             category_create: Category creation schema
 
         Returns:
             Category: Created category
         """
-        existing_category = self.get_by_name(db, category_create.name)
+        existing_category = await CategoryCRUD.get_by_name(db, category_create.name)
         if existing_category:
             raise ValueError("Category with this name already exists")
 
         db_category = Category(name=category_create.name)
 
         db.add(db_category)
-        db.commit()
-        db.refresh(db_category)
+        await db.commit()
+        await db.refresh(db_category)
 
         return db_category
 
-    def update(
-        self, db: Session, category_id: int, category_update: CategoryUpdate
+    @staticmethod
+    async def update(
+        db: AsyncSession, category_id: int, category_update: CategoryUpdate
     ) -> Optional[Category]:
         """
         Update category
 
         Args:
-            db: Database session
+            db: Database AsyncSession
             category_id: Category ID
             category_update: Data for update
 
         Returns:
             Category: Updated category or None if not found
         """
-        db_category = self.get_by_id(db, category_id)
+        db_category = await CategoryCRUD.get_by_id(db, category_id)
         if not db_category:
             return None
 
@@ -158,33 +180,35 @@ class CategoryCRUD:
         for field, value in update_data.items():
             setattr(db_category, field, value)
 
-        db.commit()
-        db.refresh(db_category)
+        await db.commit()
+        await db.refresh(db_category)
 
         return db_category
 
-    def delete(self, db: Session, category_id: int) -> bool:
+    @staticmethod
+    async def delete(db: AsyncSession, category_id: int) -> bool:
         """
         Delete category
 
         Args:
-            db: Database session
+            db: Database AsyncSession
             category_id: Category ID
 
         Returns:
             bool: True if deleted, False if not found
         """
-        db_category = self.get_by_id(db, category_id)
+        db_category = await CategoryCRUD.get_by_id(db, category_id)
         if not db_category:
             return False
 
-        products_count = (
-            db.query(Product).filter(Product.category_id == category_id).count()
+        result = await db.execute(
+            select(func.count()).select_from(Product).filter(Product.category_id == category_id)
         )
+        products_count = result.scalar_one()
         if products_count > 0:
             raise ValueError("Cannot delete category with existing products")
 
-        db.delete(db_category)
-        db.commit()
+        await db.delete(db_category)
+        await db.commit()
 
         return True

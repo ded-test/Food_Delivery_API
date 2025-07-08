@@ -17,7 +17,7 @@ class OrderStatus(str, Enum):
 class OrderItemBase(BaseModel):
     product_id: int
     quantity: int = Field(ge=1, default=1)
-    price_per_item: float = Field(ge=0)
+    price: float = Field(ge=0)
 
 
 class OrderItemCreate(OrderItemBase):
@@ -26,7 +26,7 @@ class OrderItemCreate(OrderItemBase):
 
 class OrderItemUpdate(BaseModel):
     quantity: Optional[int] = Field(None, ge=1)
-    price_per_item: Optional[float] = Field(None, ge=0)
+    price: Optional[float] = Field(None, ge=0)
 
 
 class OrderItemResponse(OrderItemBase):
