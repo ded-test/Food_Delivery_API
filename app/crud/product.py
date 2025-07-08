@@ -22,7 +22,9 @@ class ProductCRUD:
 
     @staticmethod
     async def get_by_name(db: AsyncSession, product_name: str) -> Optional[Product]:
-        result = await db.execute((select(Product).filter(Product.name == product_name)))
+        result = await db.execute(
+            (select(Product).filter(Product.name == product_name))
+        )
         return result.scalar_one_or_none()
 
     @staticmethod
@@ -31,7 +33,9 @@ class ProductCRUD:
         return result.scalars().all()
 
     @staticmethod
-    async def toggle_availability(db: AsyncSession, product_id: int) -> Optional[Product]:
+    async def toggle_availability(
+        db: AsyncSession, product_id: int
+    ) -> Optional[Product]:
         """Toggle product availability"""
         db_product = await ProductCRUD.get_by_id(db, product_id)
         if not db_product:
@@ -129,7 +133,9 @@ class CategoryCRUD:
 
     @staticmethod
     async def get_by_name(db: AsyncSession, category_name: str) -> Optional[Category]:
-        result = await db.execute(select(Category).filter(Category.name == category_name))
+        result = await db.execute(
+            select(Category).filter(Category.name == category_name)
+        )
         return result.scalar_one_or_none()
 
     @staticmethod
@@ -202,7 +208,9 @@ class CategoryCRUD:
             return False
 
         result = await db.execute(
-            select(func.count()).select_from(Product).filter(Product.category_id == category_id)
+            select(func.count())
+            .select_from(Product)
+            .filter(Product.category_id == category_id)
         )
         products_count = result.scalar_one()
         if products_count > 0:

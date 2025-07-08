@@ -6,6 +6,7 @@ from app.models import Order
 from app.models.order import Order, OrderItem, OrderStatus
 from app.schemas.order import OrderCreate, OrderUpdate, OrderItemCreate, OrderItemUpdate
 
+
 class OrderCRUD:
 
     @staticmethod
@@ -20,7 +21,9 @@ class OrderCRUD:
 
     @staticmethod
     async def get_open_orders(db: AsyncSession) -> Sequence[Order]:
-        result = await db.execute(select(Order).filter(Order.status != OrderStatus.COMPLETED))
+        result = await db.execute(
+            select(Order).filter(Order.status != OrderStatus.COMPLETED)
+        )
         return result.scalars().all()
 
     @staticmethod
@@ -51,7 +54,7 @@ class OrderCRUD:
             user_id=order_create.user_id,
             status=OrderStatus.NEW,
             total_amount=total_amount,
-            delivery_address=order_create.delivery_address
+            delivery_address=order_create.delivery_address,
         )
 
         for item in order_create.items:
@@ -67,7 +70,6 @@ class OrderCRUD:
         await db.refresh(db_order)
 
         return db_order
-
 
     @staticmethod
     async def update(
@@ -137,12 +139,16 @@ class OrderItemCRUD:
 
     @staticmethod
     async def get_by_id(db: AsyncSession, order_item_id: int) -> Optional[OrderItem]:
-        result = await db.execute(select(OrderItem).filter(OrderItem.id == order_item_id))
+        result = await db.execute(
+            select(OrderItem).filter(OrderItem.id == order_item_id)
+        )
         return result.scalar_one_or_none()
 
     @staticmethod
     async def get_by_order_id(db: AsyncSession, order_id: int) -> Sequence[OrderItem]:
-        result = await db.execute(select(OrderItem).filter(OrderItem.order_id == order_id))
+        result = await db.execute(
+            select(OrderItem).filter(OrderItem.order_id == order_id)
+        )
         return result.scalars().all()
 
     @staticmethod
@@ -172,7 +178,7 @@ class OrderItemCRUD:
 
     @staticmethod
     async def update(
-            db: AsyncSession, order_item_id: int, item_update: OrderItemUpdate
+        db: AsyncSession, order_item_id: int, item_update: OrderItemUpdate
     ) -> Optional[OrderItem]:
         db_item = await OrderItemCRUD.get_by_id(db, order_item_id)
         if not db_item:

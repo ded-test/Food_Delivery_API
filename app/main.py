@@ -6,6 +6,8 @@ from sqlalchemy import select
 from app.core.config import settings
 from app.core.database import db_manager, redis_manager
 
+from app.api import *
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -75,6 +77,8 @@ async def _cleanup():
 
 
 main_app = FastAPI(lifespan=lifespan)
+
+main_app.include_router(product_router)
 
 
 @main_app.post("/")

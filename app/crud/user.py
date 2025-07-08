@@ -157,7 +157,9 @@ class UserCRUD:
         return password_hash == hashed_password
 
     @staticmethod
-    async def authenticate(db: AsyncSession, number: str, password: str) -> Optional[User]:
+    async def authenticate(
+        db: AsyncSession, number: str, password: str
+    ) -> Optional[User]:
         """
         Authenticate user
 
@@ -173,7 +175,9 @@ class UserCRUD:
         if not user:
             return None
 
-        if not UserCRUD._verify_password(password, user.password_salt, user.password_hash):
+        if not UserCRUD._verify_password(
+            password, user.password_salt, user.password_hash
+        ):
             return None
 
         return user
@@ -183,12 +187,16 @@ class UserAddressCRUD:
 
     @staticmethod
     async def get_by_id(db: AsyncSession, address_id: int) -> Optional[UserAddress]:
-        result = await db.execute(select(UserAddress).filter(UserAddress.id == address_id))
+        result = await db.execute(
+            select(UserAddress).filter(UserAddress.id == address_id)
+        )
         return result.scalar_one_or_none()
 
     @staticmethod
     async def get_by_user_id(db: AsyncSession, user_id: int) -> Sequence[UserAddress]:
-        result = await db.execute(select(UserAddress).filter(UserAddress.user_id == user_id))
+        result = await db.execute(
+            select(UserAddress).filter(UserAddress.user_id == user_id)
+        )
         return result.scalars().all()
 
     @staticmethod
