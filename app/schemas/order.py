@@ -35,6 +35,16 @@ class OrderItemResponse(OrderItemBase):
     id: int
     order_id: int
 
+    @classmethod
+    def from_orm(cls, obj):
+        return cls(
+            id=obj.id,
+            order_id=obj.order_id,
+            product_id=obj.product_id,
+            quantity=obj.quantity,
+            price=obj.price,
+        )
+
 
 # Schemes for orders
 class OrderBase(BaseModel):
@@ -61,6 +71,22 @@ class OrderResponse(OrderBase):
     total_amount: float
     created_at: datetime
     items: List[OrderItemResponse] = []
+
+    @classmethod
+    def from_orm(cls, obj):
+        return cls(
+            id=obj.id,
+            user_id=obj.user_id,
+            status=obj.status,
+            total_amount=obj.total_amount,
+            created_at=obj.created_at,
+            delivery_address=obj.delivery_address,
+            items=(
+                [OrderItemResponse.from_orm(item) for item in obj.items]
+                if obj.items
+                else []
+            ),
+        )
 
 
 # Extended response schema with user information

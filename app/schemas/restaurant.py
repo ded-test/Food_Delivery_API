@@ -48,6 +48,18 @@ class RestaurantResponse(RestaurantBase):
 
     id: int
 
+    @classmethod
+    def from_orm(cls, obj):
+        return cls(
+            name=obj.name,
+            description=obj.description,
+
+            street=obj.street,
+            house_number=obj.house_number,
+            apartment=obj.apartment,
+            city=obj.city,
+            country=obj.country
+        )
 
 # Additional schemes for specific cases
 class RestaurantPublicInfo(BaseModel):

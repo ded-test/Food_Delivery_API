@@ -1,29 +1,67 @@
-"""
-Products (Product)
-    GET /products — Get a list of all products.
-    POST /products — Create a new product.
-    GET /products/{id} — Get information about a product by ID.
-    PUT /products/{id} — Update information about a product by ID.
-    DELETE /products/{id} — Delete a product by ID.
-    GET /categories/{category_id}/products — Get a list of products by category.
-"""
+from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
 
-from app.core.database import DatabaseManager, RedisManager, get_redis, get_db_session
+from app.core.database import get_db_session
 from app.crud.product import ProductCRUD
 from app.schemas.product import (
-    ProductBase,
     ProductCreate,
     ProductUpdate,
     ProductResponse,
 )
 
+
 router = APIRouter(prefix="/products", tags=["products"])
 
 
-@router.get("/products")
+@router.get("/", response_model=List[ProductResponse])
 async def get_products(db: AsyncSession = Depends(get_db_session)):
-    return await ProductCRUD.get_all_products(db)
+    result = await ProductCRUD.get_all_products(db)
+    return result
+
+
+@router.get("/{id}", response_model=ProductResponse)
+async def get_product_by_id(
+    product_id: int, db: AsyncSession = Depends(get_db_session)
+):
+    result = await ProductCRUD.get_by_id(db=db, product_id=product_id)
+    return result
+
+
+@router.get("/{name}", response_model=ProductResponse)
+async def get_product_by_name(name: str, db: AsyncSession = Depends(get_db_session)):
+    result = await ProductCRUD.get_by_name(db=db, product_name=name)
+    return result
+
+
+@router.get("/{category_id}/products", response_model=ProductResponse)
+async def get_products_by_category(
+    category_id: int, db: AsyncSession = Depends(get_db_session)
+):
+    result = await ProductCRUD.get_products_by_category(db=db, category_id=category_id)
+    return result
+
+
+@router.post("/create", response_model=ProductResponse)
+async def create_product(
+    product: ProductCreate, db: AsyncSession = Depends(get_db_session)
+):
+    result = await ProductCRUD.create(db=db, product_create=product)
+    return result
+
+
+@router.put("/update/{id}", response_model=ProductResponse)
+async def update_product(
+    product_id: int, product: ProductUpdate, db: AsyncSession = Depends(get_db_session)
+):
+    result = await ProductCRUD.update(
+        db=db, product_id=product_id, product_update=product
+    )
+    return result
+
+
+@router.delete("/delete/{id}", response_model=ProductResponse)
+async def delete_product(product_id: int, db: AsyncSession = Depends(get_db_session)):
+    result = await ProductCRUD.delete(db=db, product_id=product_id)
+    return result

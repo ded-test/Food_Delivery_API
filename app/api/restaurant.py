@@ -1,23 +1,43 @@
-"""
-Restaurants (Restaurant)
-    GET /restaurants — Get a list of all restaurants.
-    POST /restaurants — Create a new restaurant.
-    GET /restaurants/{id} — Get information about a restaurant by ID.
-    PUT /restaurants/{id} — Update information about a restaurant by ID.
-    DELETE /restaurants/{id} — Delete a restaurant by ID.
-"""
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
-from app.core.database import DatabaseManager, RedisManager, get_redis, get_db_session
+from app.core.database import get_db_session
 from app.crud.restaurant import RestaurantCRUD
 from app.schemas.restaurant import (
-    RestaurantBase,
     RestaurantCreate,
     RestaurantUpdate,
     RestaurantResponse,
 )
 
 router = APIRouter(prefix="/restaurant", tags=["restaurant"])
+
+@router.get("/all", response_model=RestaurantResponse)
+async def get_all_restaurants(db: AsyncSession = Depends(get_db_session)):
+    result = await RestaurantCRUD.get_all(db=db)
+    return result
+
+@router.get("/{id}", response_model=RestaurantResponse)
+async def get_restaurant_by_id(restaurant_id: int, db: AsyncSession = Depends(get_db_session)):
+    result = await RestaurantCRUD.get_by_id(db=db, restaurant_id=restaurant_id)
+    return result
+
+@router.get("/{name}", response_model=RestaurantResponse)
+async def get_restaurant_by_name(restaurant_name: str, db: AsyncSession = Depends(get_db_session)):
+    result = await RestaurantCRUD.get_by_name(db=db, restaurant_name=restaurant_name)
+    return result
+
+@router.post("/create", response_model=RestaurantResponse)
+async def create_restaurant(restaurant_create: RestaurantCreate, db: AsyncSession = Depends(get_db_session)):
+    result = await RestaurantCRUD.create(db=db, restaurant_create=restaurant_create)
+    return result
+
+@router.put("/update", response_model=RestaurantResponse)
+async def update_restaurant(restaurant_id: int, restaurant_update: RestaurantUpdate, db: AsyncSession = Depends(get_db_session)):
+    result = await RestaurantCRUD.update(db=db, restaurant_id=restaurant_id, restaurant_update=restaurant_update)
+    return result
+
+@router.delete("/delete", response_model=RestaurantResponse)
+async def delete_restaurant(restaurant_id: int, db: AsyncSession = Depends(get_db_session)):
+    result = await RestaurantCRUD.delete(db=db, restaurant_id=restaurant_id)
+    return result

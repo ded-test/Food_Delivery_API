@@ -1,15 +1,16 @@
-from typing import Optional, List, Type, Any, Coroutine, Sequence
+from typing import Optional, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
-from app.models import Product
 from app.models.product import Product, Category
 from app.schemas.product import (
     ProductCreate,
     ProductUpdate,
+    ProductResponse,
     CategoryCreate,
     CategoryUpdate,
+    CategoryResponse,
 )
 
 
@@ -28,9 +29,18 @@ class ProductCRUD:
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_all_products(db: AsyncSession) -> Sequence[Product]:
+    async def get_all_products(db: AsyncSession) -> List[ProductResponse]:
         result = await db.execute(select(Product))
-        return result.scalars().all()
+        products = result.scalars().all()
+        return [ProductResponse.from_orm(product) for product in products]
+
+    @staticmethod
+    async def get_products_by_category(db: AsyncSession, category_id: int) -> List[ProductResponse]:
+        result = await db.execute(
+            select(Product).filter(Product.category_id == category_id)
+        )
+        products = result.scalars().all()
+        return [ProductResponse.from_orm(product) for product in products]
 
     @staticmethod
     async def toggle_availability(
@@ -125,6 +135,12 @@ class ProductCRUD:
 
 
 class CategoryCRUD:
+
+    @staticmethod
+    async def get_all(db: AsyncSession) -> list[CategoryResponse]:
+        result = await db.execute(select(Category))
+        categories = result.scalars().all()
+        return [CategoryResponse.from_orm(category) for category in categories]
 
     @staticmethod
     async def get_by_id(db: AsyncSession, category_id: int) -> Optional[Category]:

@@ -1,27 +1,38 @@
-from typing import Optional, List, Any, Type
-from sqlalchemy.orm import Session
+from typing import Optional, List, Any, Type, Coroutine
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.models.restaurant import Restaurant
-from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate
+from app.schemas.order import OrderResponse
+from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate, RestaurantResponse
 
 
 class RestaurantCRUD:
 
     @staticmethod
-    def get_by_id(db: Session, restaurant_id: int) -> Optional[Restaurant]:
-        return db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+    async def get_all(db: AsyncSession) -> List[RestaurantResponse]:
+        result = await db.execute(select(Restaurant))
+        restaurants = result.scalars().all()
+        return [RestaurantResponse.from_orm(restaurant) for restaurant in restaurants]
 
     @staticmethod
-    def get_by_name(db: Session, restaurant_name: str) -> list[Type[Restaurant]]:
-        return db.query(Restaurant).filter(Restaurant.name == restaurant_name).all()
+    async def get_by_id(db: AsyncSession, restaurant_id: int) -> Optional[Restaurant]:
+        result = await db.execute(select(Restaurant).filter(Restaurant.id == restaurant_id))
+        return result.scalar_one_or_none()
 
     @staticmethod
-    def create(db: Session, restaurant_create: RestaurantCreate) -> Restaurant:
+    async def get_by_name(db: AsyncSession, restaurant_name: str) -> List[RestaurantResponse]:
+        result = await db.execute(select(Restaurant).filter(Restaurant.name == restaurant_name))
+        restaurants = result.scalars().all()
+        return [RestaurantResponse.from_orm(restaurant) for restaurant in restaurants]
+
+    @staticmethod
+    async def create(db: AsyncSession, restaurant_create: RestaurantCreate) -> Restaurant:
         """
         Create new restaurant
 
         Args:
-            db: Database session
+            db: Database AsyncSession
             restaurant_create: Restaurant creation schema
 
         Returns:
@@ -38,27 +49,27 @@ class RestaurantCRUD:
         )
 
         db.add(db_restaurant)
-        db.commit()
-        db.refresh(db_restaurant)
+        await db.commit()
+        await db.refresh(db_restaurant)
 
         return db_restaurant
 
     @staticmethod
-    def update(
-        db: Session, restaurant_id: int, restaurant_update: RestaurantUpdate
+    async def update(
+        db: AsyncSession, restaurant_id: int, restaurant_update: RestaurantUpdate
     ) -> Optional[Restaurant]:
         """
         Update restaurant
 
         Args:
-            db: Database session
+            db: Database AsyncSession
             restaurant_id: Restaurant ID
             restaurant_update: Data for update
 
         Returns:
             Restaurant: Updated Restaurant or None if not found
         """
-        db_restaurant = RestaurantCRUD.get_by_id(db, restaurant_id)
+        db_restaurant = await RestaurantCRUD.get_by_id(db, restaurant_id)
         if not db_restaurant:
             return None
 
@@ -67,28 +78,28 @@ class RestaurantCRUD:
         for field, value in update_data.items():
             setattr(db_restaurant, field, value)
 
-        db.commit()
-        db.refresh(db_restaurant)
+        await db.commit()
+        await db.refresh(db_restaurant)
 
         return db_restaurant
 
     @staticmethod
-    def delete(db: Session, restaurant_id: int):
+    async def delete(db: AsyncSession, restaurant_id: int):
         """
         Delete restaurant
 
         Args:
-            db: Database session
+            db: Database AsyncSession
             restaurant_id: Restaurant ID
 
         Returns:
             bool: True if deleted, False if not found
         """
-        db_restaurant = RestaurantCRUD.get_by_id(db, restaurant_id)
+        db_restaurant = await RestaurantCRUD.get_by_id(db, restaurant_id)
         if not db_restaurant:
             return False
 
-        db.delete(db_restaurant)
-        db.commit()
+        await db.delete(db_restaurant)
+        await db.commit()
 
         return True

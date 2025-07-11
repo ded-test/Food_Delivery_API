@@ -45,6 +45,10 @@ class CategoryResponse(CategoryBase):
     class Config:
         from_attributes = True
 
+    @classmethod
+    def from_orm(cls, obj):
+        return cls(id=obj.id, name=obj.name)
+
 
 class ProductBase(BaseModel):
     name: str
@@ -144,3 +148,17 @@ class ProductResponse(ProductBase):
 
     class Config:
         from_attributes = True
+
+    @classmethod
+    def from_orm(cls, obj):
+        return cls(
+            id=obj.id,
+            name=obj.name,
+            price=obj.price,
+            description=obj.description,
+            category=(
+                {"id": obj.category.id, "name": obj.category.name}
+                if obj.category
+                else None
+            ),
+        )

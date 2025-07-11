@@ -9,7 +9,7 @@ from app.schemas.user import (
     UserUpdate,
     UserChangePassword,
     UserAddressCreate,
-    UserAddressUpdate,
+    UserAddressUpdate, UserAddressResponse,
 )
 
 
@@ -23,6 +23,11 @@ class UserCRUD:
     @staticmethod
     async def get_by_number(db: AsyncSession, number: str) -> Optional[User]:
         result = await db.execute(select(User).filter(User.number == number))
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_by_name(db: AsyncSession, name: str) -> Optional[User]:
+        result = await db.execute(select(User).filter(User.first_name == name))
         return result.scalar_one_or_none()
 
     @staticmethod
@@ -186,22 +191,23 @@ class UserCRUD:
 class UserAddressCRUD:
 
     @staticmethod
-    async def get_by_id(db: AsyncSession, address_id: int) -> Optional[UserAddress]:
+    async def get_by_id(db: AsyncSession, user_address_id: int) -> Optional[UserAddress]:
         result = await db.execute(
-            select(UserAddress).filter(UserAddress.id == address_id)
+            select(UserAddress).filter(UserAddress.id == user_address_id)
         )
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_by_user_id(db: AsyncSession, user_id: int) -> Sequence[UserAddress]:
+    async def get_by_user_id(db: AsyncSession, user_id: int) -> List[UserAddress]:
         result = await db.execute(
             select(UserAddress).filter(UserAddress.user_id == user_id)
         )
-        return result.scalars().all()
+        addresses = result.scalars().all()
+        return [UserAddressResponse.from_orm(address) for address in addresses]
 
     @staticmethod
     async def create(
-        db: AsyncSession, user_id: int, address_create: UserAddressCreate
+        db: AsyncSession, user_id: int, user_address_create: UserAddressCreate
     ) -> UserAddress:
         """
         Create new address for user
@@ -209,12 +215,12 @@ class UserAddressCRUD:
         Args:
             db: Database AsyncSession
             user_id: User ID
-            address_create: Address creation data
+            user_address_id: Address creation data
 
         Returns:
             UserAddress: Created address
         """
-        db_address = UserAddress(user_id=user_id, **address_create.model_dump())
+        db_address = UserAddress(user_id=user_id, **user_address_create.model_dump())
 
         db.add(db_address)
         await db.commit()
@@ -224,13 +230,23 @@ class UserAddressCRUD:
 
     @staticmethod
     async def update(
-        db: AsyncSession, address_id: int, address_update: UserAddressUpdate
+        db: AsyncSession, user_address_id: int, user_address_update: UserAddressUpdate
     ) -> Optional[UserAddress]:
-        db_address = await UserAddressCRUD.get_by_id(db, address_id)
+        """
+        Create new address for user
+
+        Args:
+            db: Database AsyncSession
+            user_address_id: user address ID
+            user_address_update: Address updating data
+        Returns:
+            UserAddress: updating address
+        """
+        db_address = await UserAddressCRUD.get_by_id(db, user_address_id)
         if not db_address:
             return None
 
-        update_data = address_update.model_dump(exclude_unset=True)
+        update_data = user_address_update.model_dump(exclude_unset=True)
 
         for field, value in update_data.items():
             setattr(db_address, field, value)
@@ -241,8 +257,8 @@ class UserAddressCRUD:
         return db_address
 
     @staticmethod
-    async def delete(db: AsyncSession, address_id: int) -> bool:
-        db_address = await UserAddressCRUD.get_by_id(db, address_id)
+    async def delete(db: AsyncSession, user_address_id: int) -> bool:
+        db_address = await UserAddressCRUD.get_by_id(db, user_address_id)
         if not db_address:
             return False
 

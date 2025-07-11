@@ -163,7 +163,7 @@ class RedisManager(SingletonMeta):
     async def close(self):
         """Close Redis connection"""
         if self.redis:
-            await self.redis.aclose()  # Изменено для redis-py
+            await self.redis.close()
             self.redis = None
             self._database_url = None
             print("RedisManager closed")

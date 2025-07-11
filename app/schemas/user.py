@@ -1,5 +1,5 @@
 from pydantic import BaseModel, field_validator, model_validator, ConfigDict
-from typing import Optional, List
+from typing import Optional, List, Any, Self
 import hashlib
 import secrets
 
@@ -43,6 +43,16 @@ class UserAddressResponse(UserAddressBase):
 
     id: int
     user_id: int
+
+    @classmethod
+    def from_orm(cls, obj):
+        return cls(
+            street=obj.street,
+            house_number=obj.house_number,
+            apartment=obj.apartment,
+            city=obj.city,
+            country=obj.country
+        )
 
 
 class UserBase(BaseModel):

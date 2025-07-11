@@ -11,13 +11,44 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
-from app.core.database import DatabaseManager, RedisManager, get_redis, get_db_session
+from app.api.products import delete_product
+from app.core.database import get_db_session
 from app.crud.user import UserAddressCRUD
 from app.schemas.user import (
-    UserAddressBase,
     UserAddressCreate,
     UserAddressUpdate,
     UserAddressResponse,
 )
 
 router = APIRouter(prefix="/user_address", tags=["user address"])
+
+
+@router.get("/{id}", response_model=UserAddressResponse)
+async def get_user_address_by_id(user_address_id: int, db: AsyncSession = Depends(get_db_session)):
+    result = await UserAddressCRUD.get_by_id(db=db, user_address_id=user_address_id)
+    return result
+
+@router.get("/{user_id}", response_model=UserAddressResponse)
+async def get_user_address_by_user_id(user_id: int, db: AsyncSession = Depends(get_db_session)):
+    result = await UserAddressCRUD.get_by_user_id(db=db, user_id=user_id)
+    return result
+
+@router.post("/create", response_model=UserAddressResponse)
+async def create_user_address(user_id: int, user_address_create: UserAddressCreate, db: AsyncSession = Depends(get_db_session)):
+    result = await UserAddressCRUD.create(db=db, user_id=user_id, user_address_create=user_address_create)
+    return result
+
+@router.put("/update", response_model=UserAddressResponse)
+async def update_user_address(user_address_id: int, user_address_update: UserAddressUpdate, db: AsyncSession = Depends(get_db_session)):
+    result = await UserAddressCRUD.update(db=db, user_address_id=user_address_id, user_address_update=user_address_update)
+    return result
+
+@router.delete("/delete", response_model=UserAddressResponse)
+async def delete_user_address(user_address_id: int, db: AsyncSession = Depends(get_db_session)):
+    result = await UserAddressCRUD.delete(db=db, user_address_id=user_address_id)
+    return result
+
+@router.delete("/delete/{user_id}", response_model=UserAddressResponse)
+async def delete_user_address_by_user_id(user_id: int, db: AsyncSession = Depends(get_db_session)):
+    result = await UserAddressCRUD.delete_by_user_id(db=db, user_id=user_id)
+    return result

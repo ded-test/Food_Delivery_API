@@ -4,7 +4,13 @@ from sqlalchemy import select
 
 from app.models import Order
 from app.models.order import Order, OrderItem, OrderStatus
-from app.schemas.order import OrderCreate, OrderUpdate, OrderItemCreate, OrderItemUpdate
+from app.schemas.order import (
+    OrderCreate,
+    OrderUpdate,
+    OrderItemCreate,
+    OrderItemUpdate,
+    OrderResponse, OrderItemResponse,
+)
 
 
 class OrderCRUD:
@@ -15,26 +21,74 @@ class OrderCRUD:
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_by_user_id(db: AsyncSession, user_id: int) -> Optional[Order]:
-        result = await db.execute(select(Order).filter(Order.user_id == user_id))
+    async def get_last_order_by_user_id(
+        db: AsyncSession, user_id: int
+    ) -> Optional[Order]:
+        result = await db.execute(
+            select(Order)
+            .filter(Order.user_id == user_id)
+            .order_by(Order.created_at.desc())
+            .limit(1)
+        )
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_open_orders(db: AsyncSession) -> Sequence[Order]:
+    async def get_open_orders(db: AsyncSession, user_id: int) -> List[OrderResponse]:
         result = await db.execute(
-            select(Order).filter(Order.status != OrderStatus.COMPLETED)
+            select(Order)
+            .filter(Order.status != OrderStatus.COMPLETED)
+            .filter(Order.status != OrderStatus.CANCELED)
+            .filter(Order.user_id == user_id)
         )
-        return result.scalars().all()
+        orders = result.scalars().all()
+        return [OrderResponse.from_orm(order) for order in orders]
 
     @staticmethod
-    async def get_by_status(db: AsyncSession, status: OrderStatus) -> Sequence[Order]:
+    async def _get_open_orders(db: AsyncSession) -> List[OrderResponse]:
+        """
+        Returns all open orders, without user_id
+        """
+        result = await db.execute(
+            select(Order)
+            .filter(Order.status != OrderStatus.COMPLETED)
+            .filter(Order.status != OrderStatus.CANCELED)
+        )
+        orders = result.scalars().all()
+        return [OrderResponse.from_orm(order) for order in orders]
+
+    @staticmethod
+    async def get_by_status(db: AsyncSession, status: OrderStatus, user_id: int) -> List[OrderResponse]:
         result = await db.execute(select(Order).filter(Order.status == status))
-        return result.scalars().all()
+        orders = result.scalars().all()
+        return [OrderResponse.from_orm(order) for order in orders]
 
     @staticmethod
-    async def get_all(db: AsyncSession) -> Sequence[Order]:
+    async def _get_by_status(db: AsyncSession, status: OrderStatus) -> List[OrderResponse]:
+        """
+        Returns all {status} orders, without user_id
+        """
+        result = await db.execute(select(Order).filter(Order.status == status))
+        orders = result.scalars().all()
+        return [OrderResponse.from_orm(order) for order in orders]
+
+    @staticmethod
+    async def get_all(db: AsyncSession, user_id: int) -> List[OrderResponse]:
+        result = await db.execute(
+            select(Order)
+            .filter(Order.user_id == user_id)
+            .order_by(Order.created_at.desc())
+        )
+        orders = result.scalars().all()
+        return [OrderResponse.from_orm(order) for order in orders]
+
+    @staticmethod
+    async def _get_all(db: AsyncSession) -> List[OrderResponse]:
+        """
+        Returns all orders, without user_id
+        """
         result = await db.execute(select(Order).order_by(Order.created_at.desc()))
-        return result.scalars().all()
+        orders = result.scalars().all()
+        return [OrderResponse.from_orm(order) for order in orders]
 
     @staticmethod
     async def create(db: AsyncSession, order_create: OrderCreate) -> Order:
@@ -145,11 +199,12 @@ class OrderItemCRUD:
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_by_order_id(db: AsyncSession, order_id: int) -> Sequence[OrderItem]:
+    async def get_by_order_id(db: AsyncSession, order_id: int) -> List[OrderItemResponse]:
         result = await db.execute(
             select(OrderItem).filter(OrderItem.order_id == order_id)
         )
-        return result.scalars().all()
+        orders = result.scalars().all()
+        return [OrderItemResponse.from_orm(order) for order in orders]
 
     @staticmethod
     async def create(db: AsyncSession, order_item_create: OrderItemCreate) -> OrderItem:
