@@ -12,32 +12,32 @@ from app.schemas.restaurant import (
 
 router = APIRouter(prefix="/restaurant", tags=["restaurant"])
 
-@router.get("/all", response_model=RestaurantResponse)
+@router.get("/", response_model=RestaurantResponse)
 async def get_all_restaurants(db: AsyncSession = Depends(get_db_session)):
     result = await RestaurantCRUD.get_all(db=db)
     return result
 
-@router.get("/{id}", response_model=RestaurantResponse)
+@router.get("/{id:int}", response_model=RestaurantResponse)
 async def get_restaurant_by_id(restaurant_id: int, db: AsyncSession = Depends(get_db_session)):
     result = await RestaurantCRUD.get_by_id(db=db, restaurant_id=restaurant_id)
     return result
 
-@router.get("/{name}", response_model=RestaurantResponse)
+@router.get("/by-name/{name:str}", response_model=RestaurantResponse)
 async def get_restaurant_by_name(restaurant_name: str, db: AsyncSession = Depends(get_db_session)):
     result = await RestaurantCRUD.get_by_name(db=db, restaurant_name=restaurant_name)
     return result
 
-@router.post("/create", response_model=RestaurantResponse)
+@router.post("/", response_model=RestaurantResponse)
 async def create_restaurant(restaurant_create: RestaurantCreate, db: AsyncSession = Depends(get_db_session)):
     result = await RestaurantCRUD.create(db=db, restaurant_create=restaurant_create)
     return result
 
-@router.put("/update", response_model=RestaurantResponse)
+@router.put("/{id:int}", response_model=RestaurantResponse)
 async def update_restaurant(restaurant_id: int, restaurant_update: RestaurantUpdate, db: AsyncSession = Depends(get_db_session)):
     result = await RestaurantCRUD.update(db=db, restaurant_id=restaurant_id, restaurant_update=restaurant_update)
     return result
 
-@router.delete("/delete", response_model=RestaurantResponse)
+@router.delete("/{id:int}", response_model=RestaurantResponse)
 async def delete_restaurant(restaurant_id: int, db: AsyncSession = Depends(get_db_session)):
     result = await RestaurantCRUD.delete(db=db, restaurant_id=restaurant_id)
     return result

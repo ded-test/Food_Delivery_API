@@ -23,32 +23,27 @@ from app.schemas.user import (
 router = APIRouter(prefix="/user_address", tags=["user address"])
 
 
-@router.get("/{id}", response_model=UserAddressResponse)
+@router.get("/{id:int}", response_model=UserAddressResponse)
 async def get_user_address_by_id(user_address_id: int, db: AsyncSession = Depends(get_db_session)):
     result = await UserAddressCRUD.get_by_id(db=db, user_address_id=user_address_id)
     return result
 
-@router.get("/{user_id}", response_model=UserAddressResponse)
+@router.get("/by-user_id/{user_id:int}", response_model=UserAddressResponse)
 async def get_user_address_by_user_id(user_id: int, db: AsyncSession = Depends(get_db_session)):
     result = await UserAddressCRUD.get_by_user_id(db=db, user_id=user_id)
     return result
 
-@router.post("/create", response_model=UserAddressResponse)
+@router.post("/", response_model=UserAddressResponse)
 async def create_user_address(user_id: int, user_address_create: UserAddressCreate, db: AsyncSession = Depends(get_db_session)):
     result = await UserAddressCRUD.create(db=db, user_id=user_id, user_address_create=user_address_create)
     return result
 
-@router.put("/update", response_model=UserAddressResponse)
+@router.put("/{id:int}", response_model=UserAddressResponse)
 async def update_user_address(user_address_id: int, user_address_update: UserAddressUpdate, db: AsyncSession = Depends(get_db_session)):
     result = await UserAddressCRUD.update(db=db, user_address_id=user_address_id, user_address_update=user_address_update)
     return result
 
-@router.delete("/delete", response_model=UserAddressResponse)
+@router.delete("/{id:int}", response_model=UserAddressResponse)
 async def delete_user_address(user_address_id: int, db: AsyncSession = Depends(get_db_session)):
     result = await UserAddressCRUD.delete(db=db, user_address_id=user_address_id)
-    return result
-
-@router.delete("/delete/{user_id}", response_model=UserAddressResponse)
-async def delete_user_address_by_user_id(user_id: int, db: AsyncSession = Depends(get_db_session)):
-    result = await UserAddressCRUD.delete_by_user_id(db=db, user_id=user_id)
     return result

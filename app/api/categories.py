@@ -19,7 +19,7 @@ async def get_all_category(db: AsyncSession = Depends(get_db_session)):
     return result
 
 
-@router.get("/{id}", response_model=CategoryResponse)
+@router.get("/{id:int}", response_model=CategoryResponse)
 async def get_category_by_id(
     category_id: int, db: AsyncSession = Depends(get_db_session)
 ):
@@ -27,7 +27,7 @@ async def get_category_by_id(
     return result
 
 
-@router.get("/{name}", response_model=CategoryResponse)
+@router.get("/by-name/{name}", response_model=CategoryResponse)
 async def get_category_by_name(
     category_name: str, db: AsyncSession = Depends(get_db_session)
 ):
@@ -35,7 +35,7 @@ async def get_category_by_name(
     return result
 
 
-@router.post("/create", response_model=CategoryResponse)
+@router.post("/", response_model=CategoryResponse)
 async def create_category(
     category: CategoryCreate, db: AsyncSession = Depends(get_db_session)
 ):
@@ -43,7 +43,7 @@ async def create_category(
     return result
 
 
-@router.put("/{id}", response_model=CategoryResponse)
+@router.put("/{id:int}", response_model=CategoryResponse)
 async def update_category(
     category_id: int,
     category_update: CategoryUpdate,
@@ -55,7 +55,7 @@ async def update_category(
     return result
 
 
-@router.delete("/{id}", response_model=CategoryResponse)
+@router.delete("/{id:int}", response_model=CategoryResponse)
 async def delete_category(category_id: int, db: AsyncSession = Depends(get_db_session)):
     result = await CategoryCRUD.delete(db=db, category_id=category_id)
     return result

@@ -9,13 +9,13 @@ from app.schemas.order import OrderCreate, OrderUpdate, OrderResponse
 router = APIRouter(prefix="/order", tags=["order"])
 
 
-@router.get("/{order_id}", response_model=OrderResponse)
+@router.get("/{order_id:int}", response_model=OrderResponse)
 async def get_order_by_id(order_id: int, db: AsyncSession = Depends(get_db_session)):
     result = await OrderCRUD.get_by_id(db=db, order_id=order_id)
     return result
 
 
-@router.get("/{user_id}", response_model=OrderResponse)
+@router.get("/by-user_id/{user_id:int}", response_model=OrderResponse)
 async def get_last_order_by_user_id(
     user_id: int, db: AsyncSession = Depends(get_db_session)
 ):
@@ -40,7 +40,7 @@ async def get_open_orders(db: AsyncSession = Depends(get_db_session)):
     return result
 
 
-@router.get("/status/{status}", response_model=OrderResponse)
+@router.get("/status/{status:int}", response_model=OrderResponse)
 async def get_orders_by_status(
     status: OrderStatus,
     user_id: int,
@@ -50,7 +50,7 @@ async def get_orders_by_status(
     return result
 
 
-@router.get("/status/_{status}", response_model=OrderResponse)
+@router.get("/status/_{status:int}", response_model=OrderResponse)
 async def get_orders_by_status(status: int, db: AsyncSession = Depends(get_db_session)):
     """
     Returns all {status} orders, without user_id
@@ -74,13 +74,13 @@ async def get_orders(db: AsyncSession = Depends(get_db_session)):
     return result
 
 
-@router.post("/create", response_model=OrderResponse)
+@router.post("/", response_model=OrderResponse)
 async def create_order(order: OrderCreate, db: AsyncSession = Depends(get_db_session)):
     result = await OrderCRUD.create(db=db, order_create=order)
     return result
 
 
-@router.put("/update", response_model=OrderResponse)
+@router.put("/{id:int}", response_model=OrderResponse)
 async def update_order(
     order_id: int, order_update: OrderUpdate, db: AsyncSession = Depends(get_db_session)
 ):
@@ -88,7 +88,7 @@ async def update_order(
     return result
 
 
-@router.delete("/delete", response_model=OrderResponse)
+@router.delete("/{id:int}", response_model=OrderResponse)
 async def delete_order(order_id: int, db: AsyncSession = Depends(get_db_session)):
     result = await OrderCRUD.delete(db=db, order_id=order_id)
     return result
