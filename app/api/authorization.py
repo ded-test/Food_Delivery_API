@@ -28,6 +28,19 @@ async def login(
     db: AsyncSession = Depends(get_db_session),
     db_redis: redis.Redis = Depends(get_redis),
 ):
+    """
+    Authenticate user and return access and refresh tokens.
+
+    Args:
+        data (UserLogin): User login credentials (number and password)
+        db (AsyncSession): Database session
+        db_redis (redis.Redis): Redis connection for token storage
+
+    Returns:
+        Token: Pair of access and refresh tokens if authentication is successful
+    Raises:
+        HTTPException: If credentials are invalid (401 Unauthorized)
+    """
     db_user = await UserCRUD.authenticate(db, data.number, data.password)
     if not db_user:
         raise HTTPException(
@@ -52,6 +65,19 @@ async def login(
 
 @router.post("/refresh", response_model=Token)
 async def refresh_token(refresh_token: str, db_redis: redis.Redis = Depends(get_redis)):
+    """
+    Authenticate user and return access and refresh tokens.
+
+    Args:
+        data (UserLogin): User login credentials (number and password)
+        db (AsyncSession): Database session
+        db_redis (redis.Redis): Redis connection for token storage
+
+    Returns:
+        Token: Pair of access and refresh tokens if authentication is successful
+    Raises:
+        HTTPException: If credentials are invalid (401 Unauthorized)
+    """
     try:
         payload = jwt.decode(
             refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
@@ -74,6 +100,17 @@ async def refresh_token(refresh_token: str, db_redis: redis.Redis = Depends(get_
 
 @router.get("/me")
 async def me(token: str = Depends(oauth2_scheme)):
+    """
+    Get current authenticated user ID.
+
+    Args:
+        token (str): Access token from Authorization header (Bearer token)
+
+    Returns:
+        dict: Dictionary containing user_id from decoded token
+    Raises:
+        HTTPException: If token is invalid or expired (401 Unauthorized)
+    """
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
@@ -87,6 +124,18 @@ async def me(token: str = Depends(oauth2_scheme)):
 async def logout(
     token: str = Depends(oauth2_scheme), db_redis: redis.Redis = Depends(get_redis)
 ):
+    """
+    Logout user by revoking their refresh token from Redis.
+
+    Args:
+        token (str): Access token from Authorization header
+        db_redis (redis.Redis): Redis connection for token deletion
+
+    Returns:
+        dict: Confirmation message of successful logout
+    Raises:
+        HTTPException: If token is invalid or malformed (401 Unauthorized)
+    """
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
