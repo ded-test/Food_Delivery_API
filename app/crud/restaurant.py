@@ -4,7 +4,11 @@ from sqlalchemy import select
 
 from app.models.restaurant import Restaurant
 from app.schemas.order import OrderResponse
-from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate, RestaurantResponse
+from app.schemas.restaurant import (
+    RestaurantCreate,
+    RestaurantUpdate,
+    RestaurantResponse,
+)
 
 
 class RestaurantCRUD:
@@ -17,17 +21,25 @@ class RestaurantCRUD:
 
     @staticmethod
     async def get_by_id(db: AsyncSession, restaurant_id: int) -> Optional[Restaurant]:
-        result = await db.execute(select(Restaurant).filter(Restaurant.id == restaurant_id))
+        result = await db.execute(
+            select(Restaurant).filter(Restaurant.id == restaurant_id)
+        )
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_by_name(db: AsyncSession, restaurant_name: str) -> List[RestaurantResponse]:
-        result = await db.execute(select(Restaurant).filter(Restaurant.name == restaurant_name))
+    async def get_by_name(
+        db: AsyncSession, restaurant_name: str
+    ) -> List[RestaurantResponse]:
+        result = await db.execute(
+            select(Restaurant).filter(Restaurant.name == restaurant_name)
+        )
         restaurants = result.scalars().all()
         return [RestaurantResponse.from_orm(restaurant) for restaurant in restaurants]
 
     @staticmethod
-    async def create(db: AsyncSession, restaurant_create: RestaurantCreate) -> Restaurant:
+    async def create(
+        db: AsyncSession, restaurant_create: RestaurantCreate
+    ) -> Restaurant:
         """
         Create new restaurant
 

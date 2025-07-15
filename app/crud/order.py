@@ -9,7 +9,8 @@ from app.schemas.order import (
     OrderUpdate,
     OrderItemCreate,
     OrderItemUpdate,
-    OrderResponse, OrderItemResponse,
+    OrderResponse,
+    OrderItemResponse,
 )
 
 
@@ -57,13 +58,17 @@ class OrderCRUD:
         return [OrderResponse.from_orm(order) for order in orders]
 
     @staticmethod
-    async def get_by_status(db: AsyncSession, status: OrderStatus, user_id: int) -> List[OrderResponse]:
+    async def get_by_status(
+        db: AsyncSession, status: OrderStatus, user_id: int
+    ) -> List[OrderResponse]:
         result = await db.execute(select(Order).filter(Order.status == status))
         orders = result.scalars().all()
         return [OrderResponse.from_orm(order) for order in orders]
 
     @staticmethod
-    async def _get_by_status(db: AsyncSession, status: OrderStatus) -> List[OrderResponse]:
+    async def _get_by_status(
+        db: AsyncSession, status: OrderStatus
+    ) -> List[OrderResponse]:
         """
         Returns all {status} orders, without user_id
         """
@@ -199,7 +204,9 @@ class OrderItemCRUD:
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_by_order_id(db: AsyncSession, order_id: int) -> List[OrderItemResponse]:
+    async def get_by_order_id(
+        db: AsyncSession, order_id: int
+    ) -> List[OrderItemResponse]:
         result = await db.execute(
             select(OrderItem).filter(OrderItem.order_id == order_id)
         )

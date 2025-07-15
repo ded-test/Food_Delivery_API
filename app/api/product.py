@@ -35,7 +35,7 @@ async def get_product_by_name(name: str, db: AsyncSession = Depends(get_db_sessi
     return result
 
 
-@router.get("/category/{category_id:int}", response_model=ProductResponse)
+@router.get("/category/{category_id:int}", response_model=List[ProductResponse])
 async def get_products_by_category(
     category_id: int, db: AsyncSession = Depends(get_db_session)
 ):

@@ -35,7 +35,9 @@ class ProductCRUD:
         return [ProductResponse.from_orm(product) for product in products]
 
     @staticmethod
-    async def get_products_by_category(db: AsyncSession, category_id: int) -> List[ProductResponse]:
+    async def get_products_by_category(
+        db: AsyncSession, category_id: int
+    ) -> List[ProductResponse]:
         result = await db.execute(
             select(Product).filter(Product.category_id == category_id)
         )
@@ -137,7 +139,7 @@ class ProductCRUD:
 class CategoryCRUD:
 
     @staticmethod
-    async def get_all(db: AsyncSession) -> list[CategoryResponse]:
+    async def get_all(db: AsyncSession) -> List[CategoryResponse]:
         result = await db.execute(select(Category))
         categories = result.scalars().all()
         return [CategoryResponse.from_orm(category) for category in categories]

@@ -9,9 +9,8 @@ UserAddress
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
+from typing import Optional, List
 
-from app.api.products import delete_product
 from app.core.database import get_db_session
 from app.crud.user import UserAddressCRUD
 from app.schemas.user import (
@@ -24,26 +23,48 @@ router = APIRouter(prefix="/user_address", tags=["user address"])
 
 
 @router.get("/{id:int}", response_model=UserAddressResponse)
-async def get_user_address_by_id(user_address_id: int, db: AsyncSession = Depends(get_db_session)):
+async def get_user_address_by_id(
+    user_address_id: int, db: AsyncSession = Depends(get_db_session)
+):
     result = await UserAddressCRUD.get_by_id(db=db, user_address_id=user_address_id)
     return result
 
-@router.get("/by-user_id/{user_id:int}", response_model=UserAddressResponse)
-async def get_user_address_by_user_id(user_id: int, db: AsyncSession = Depends(get_db_session)):
+
+@router.get("/by-user_id/{user_id:int}", response_model=List[UserAddressResponse])
+async def get_user_address_by_user_id(
+    user_id: int, db: AsyncSession = Depends(get_db_session)
+):
     result = await UserAddressCRUD.get_by_user_id(db=db, user_id=user_id)
     return result
 
+
 @router.post("/", response_model=UserAddressResponse)
-async def create_user_address(user_id: int, user_address_create: UserAddressCreate, db: AsyncSession = Depends(get_db_session)):
-    result = await UserAddressCRUD.create(db=db, user_id=user_id, user_address_create=user_address_create)
+async def create_user_address(
+    user_id: int,
+    user_address_create: UserAddressCreate,
+    db: AsyncSession = Depends(get_db_session),
+):
+    result = await UserAddressCRUD.create(
+        db=db, user_id=user_id, user_address_create=user_address_create
+    )
     return result
+
 
 @router.put("/{id:int}", response_model=UserAddressResponse)
-async def update_user_address(user_address_id: int, user_address_update: UserAddressUpdate, db: AsyncSession = Depends(get_db_session)):
-    result = await UserAddressCRUD.update(db=db, user_address_id=user_address_id, user_address_update=user_address_update)
+async def update_user_address(
+    user_address_id: int,
+    user_address_update: UserAddressUpdate,
+    db: AsyncSession = Depends(get_db_session),
+):
+    result = await UserAddressCRUD.update(
+        db=db, user_address_id=user_address_id, user_address_update=user_address_update
+    )
     return result
 
+
 @router.delete("/{id:int}", response_model=UserAddressResponse)
-async def delete_user_address(user_address_id: int, db: AsyncSession = Depends(get_db_session)):
+async def delete_user_address(
+    user_address_id: int, db: AsyncSession = Depends(get_db_session)
+):
     result = await UserAddressCRUD.delete(db=db, user_address_id=user_address_id)
     return result

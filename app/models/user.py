@@ -7,19 +7,12 @@ from sqlalchemy.orm import relationship, mapped_column, Mapped
 from app.models.base import Base
 
 
-class GenderEnum(str, enum.Enum):
-    MALE = "man"
-    FEMALE = "woman"
-
-
 class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     first_name: Mapped[str] = mapped_column(nullable=False)
     last_name: Mapped[str] = mapped_column(nullable=False)
-    gender: Mapped[GenderEnum]
-    years: Mapped[int] = mapped_column(nullable=False)
     number: Mapped[str] = mapped_column(unique=True, nullable=False)
     password_salt: Mapped[str] = mapped_column(nullable=False)
     password_hash: Mapped[str] = mapped_column(nullable=False)

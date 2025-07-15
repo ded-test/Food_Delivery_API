@@ -3,13 +3,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, delete
 import hashlib
 
+from app.core.security import verify_password
 from app.models.user import User, UserAddress
 from app.schemas.user import (
     UserCreate,
     UserUpdate,
     UserChangePassword,
     UserAddressCreate,
-    UserAddressUpdate, UserAddressResponse,
+    UserAddressUpdate,
+    UserAddressResponse,
+    UserLogin,
 )
 
 
@@ -61,6 +64,45 @@ class UserCRUD:
         await db.refresh(db_user)
 
         return db_user
+
+    @staticmethod
+    async def login(db: AsyncSession, user_login: UserLogin) -> Optional[User]:
+        """
+        Authenticate user login
+
+        Args:
+            db: Database AsyncSession
+            user_login: User login schema
+
+        Returns:
+            User: Authenticated user if credentials are valid, None otherwise
+        """
+        db_user = await UserCRUD.get_by_number(db, user_login.number)
+        if not db_user:
+            return None
+
+        if not verify_password(user_login.password, db_user.password_hash):
+            return None
+
+        return db_user
+
+    @staticmethod
+    async def authenticate_user_login(
+        db: AsyncSession, number: str, password: str
+    ) -> Optional[User]:
+        """
+        Authenticate user by number and password
+
+        Args:
+            db: Database AsyncSession
+            number: Phone number
+            password: Plain password
+
+        Returns:
+            User: Authenticated user if credentials are valid, None otherwise
+        """
+        user_login = UserLogin(number=number, password=password)
+        return await UserCRUD.login(db, user_login)
 
     @staticmethod
     async def update(
@@ -176,22 +218,24 @@ class UserCRUD:
         Returns:
             User: User if authentication successful, otherwise None
         """
-        user = await UserCRUD.get_by_number(db, number)
-        if not user:
+        db_user = await UserCRUD.get_by_number(db, number)
+        if not db_user:
             return None
 
         if not UserCRUD._verify_password(
-            password, user.password_salt, user.password_hash
+            password, db_user.password_salt, db_user.password_hash
         ):
             return None
 
-        return user
+        return db_user
 
 
 class UserAddressCRUD:
 
     @staticmethod
-    async def get_by_id(db: AsyncSession, user_address_id: int) -> Optional[UserAddress]:
+    async def get_by_id(
+        db: AsyncSession, user_address_id: int
+    ) -> Optional[UserAddress]:
         result = await db.execute(
             select(UserAddress).filter(UserAddress.id == user_address_id)
         )
