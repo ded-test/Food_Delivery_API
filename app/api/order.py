@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db_session
+from app.core.dependencies import get_db_session
 from app.crud.order import OrderCRUD
 from app.models.order import OrderStatus
 from app.schemas.order import OrderCreate, OrderUpdate, OrderResponse

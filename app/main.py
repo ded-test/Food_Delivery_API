@@ -78,6 +78,7 @@ async def _cleanup():
 
 main_app = FastAPI(lifespan=lifespan)
 
+main_app.include_router(authorization_router)
 main_app.include_router(categories_router)
 main_app.include_router(order_item_router)
 main_app.include_router(orders_router)

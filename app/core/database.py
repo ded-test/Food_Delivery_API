@@ -138,7 +138,7 @@ class RedisManager(SingletonMeta):
             self.redis = redis.from_url(
                 database_url, decode_responses=True, encoding="utf-8"
             )
-            await self.redis.ping()
+            self.redis.ping()
             self._database_url = database_url
             print(f"Redis initialized: {database_url}")
         except Exception as e:

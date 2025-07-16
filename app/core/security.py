@@ -16,26 +16,30 @@ def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
 
-async def create_token(
+def create_token(
     user_id: int, expires_delta: timedelta, token_type="access"
 ) -> str:
     to_encode = {
         "sub": str(user_id),
         "type": token_type,
-        "exp": datetime.utcnow() + expires_delta,
+        "exp": int((datetime.utcnow() + expires_delta).timestamp()),
     }
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 async def save_refresh_token(user_id: int, token: str, redis_conn=None):
-    await redis_conn.set(
-        f"refresh:{user_id}", token, ex=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400
+    token_str = str(token)
+
+    redis_conn.set(
+        f"refresh:{user_id}",
+        token_str,
+        ex=settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400
     )
 
 
-async def get_stored_refresh_token(user_id: int, redis_conn=None) -> str:
-    return await redis_conn.get(f"refresh:{user_id}")
+def get_stored_refresh_token(user_id: int, redis_conn=None) -> str:
+    return redis_conn.get(f"refresh:{user_id}")
 
 
-async def remove_refresh_token(user_id: int, redis_conn=None):
-    await redis_conn.delete(f"refresh:{user_id}")
+def remove_refresh_token(user_id: int, redis_conn=None):
+    redis_conn.delete(f"refresh:{user_id}")

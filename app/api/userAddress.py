@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, List
 
-from app.core.database import get_db_session
+from app.core.dependencies import get_db_session
 from app.crud.user import UserAddressCRUD
 from app.schemas.user import (
     UserAddressCreate,

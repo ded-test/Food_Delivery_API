@@ -19,7 +19,7 @@ from app.crud.user import UserCRUD
 from app.schemas.jwt_token import Token, UserLogin
 from app.core.config import settings
 
-router = APIRouter()
+router = APIRouter(tags=["authorization"])
 
 
 @router.post("/login", response_model=Token)
@@ -88,11 +88,11 @@ async def refresh_token(refresh_token: str, db_redis: redis.Redis = Depends(get_
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-    stored = await get_stored_refresh_token(user_id, db_redis)
+    stored = get_stored_refresh_token(user_id, db_redis)
     if stored != refresh_token:
         raise HTTPException(status_code=401, detail="Revoked token")
 
-    access = await create_token(
+    access = create_token(
         user_id, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     return Token(access_token=access, refresh_token=refresh_token)

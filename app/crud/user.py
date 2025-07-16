@@ -152,7 +152,7 @@ class UserCRUD:
         if not db_user:
             return None
 
-        if not UserCRUD._verify_password(
+        if not await UserCRUD._verify_password(
             password_change.current_password,
             db_user.password_salt,
             db_user.password_hash,
@@ -222,7 +222,7 @@ class UserCRUD:
         if not db_user:
             return None
 
-        if not UserCRUD._verify_password(
+        if not await UserCRUD._verify_password(
             password, db_user.password_salt, db_user.password_hash
         ):
             return None
